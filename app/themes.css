@@ -1,0 +1,251 @@
+/*
+ * Dolaby themes
+ *
+ * The active theme is selected in config/theme.ts. Component styles should
+ * consume these tokens so a theme switch never requires editing globals.css.
+ */
+
+:root,
+html[data-theme="boutique"] {
+  color-scheme: light;
+
+  /* Core palette */
+  --charcoal: #2e2a26;
+  --charcoal-soft: #443d36;
+  --terracotta: #9d5138;
+  --terracotta-deep: #7f402e;
+  --terracotta-soft: #ead4c7;
+  --clay: #c47b5d;
+  --olive: #77745c;
+  --olive-deep: #5f5e49;
+  --sage-soft: #d9d5c4;
+  --olive-soft: #e1ddcf;
+  --stone: #e8e1d6;
+  --ink: #2d2925;
+  --ink-soft: #544d45;
+  --muted: #7c7369;
+  --line: #ddd3c7;
+  --line-dark: #cfc2b3;
+  --canvas: #eee9e0;
+  --paper: #f8f4ec;
+  --paper-soft: #f2ece3;
+  --forest: var(--charcoal);
+  --forest-2: var(--terracotta);
+  --sage: var(--sage-soft);
+  --sage-strong: var(--olive);
+  --lime: var(--clay);
+  --peach: var(--terracotta-soft);
+  --lilac: var(--olive-soft);
+  --gold: #9d733f;
+  --red: #8c4a3f;
+  --red-bg: #ead8d1;
+
+  /* RGB channels used by translucent surfaces */
+  --paper-rgb: 248, 244, 236;
+  --ink-rgb: 45, 39, 33;
+  --charcoal-rgb: 46, 42, 38;
+  --action-rgb: 157, 81, 56;
+  --action-hover-rgb: 127, 64, 46;
+  --accent-rgb: 196, 123, 93;
+  --olive-rgb: 119, 116, 92;
+  --sage-rgb: 217, 213, 196;
+  --topbar-rgb: 238, 233, 224;
+  --overlay-rgb: 43, 38, 33;
+
+  /* Semantic surfaces and details */
+  --on-dark: var(--paper);
+  --on-action: var(--paper);
+  --selection-bg: var(--terracotta-soft);
+  --selection-text: var(--charcoal);
+  --scrollbar: #c9bfb2;
+  --button-hover-border: #b8aa99;
+  --button-hover-bg: #fbf7f0;
+  --brand-mark-bg: var(--charcoal);
+  --brand-mark-fg: var(--terracotta-soft);
+  --brand-light-mark-bg: var(--terracotta);
+  --brand-light-mark-fg: var(--paper);
+  --tabs-bg: var(--stone);
+  --placeholder: #a79b8e;
+  --notice-border: #d9d3c2;
+  --notice-bg: #efebe1;
+  --text-faint: #958b80;
+  --text-fainter: #9d9388;
+  --sidebar-bg: #e7e1d7;
+  --nav-text: #6f675e;
+  --nav-count-bg: #ddd5ca;
+  --demo-border: #d0cbb9;
+  --demo-bg-rgb: 217, 213, 196;
+  --status-dot: var(--olive);
+  --status-dot-rgb: 119, 116, 92;
+  --avatar-bg: #d8d2c5;
+  --search-text: #8d8379;
+  --hero-bg: #dfd7c9;
+  --hero-copy: #6f675e;
+  --muted-icon: #9a9085;
+  --attention-bg: #f5eee6;
+  --attention-text: #795642;
+  --attention-badge-bg-rgb: 247, 229, 224;
+  --attention-badge-text: #8d4c42;
+  --error-icon: #e89a8f;
+  --care-border: #e4d7c7;
+  --care-bg: #f5eee5;
+  --care-text: #755844;
+  --dashed-border: #c8bcaf;
+  --neutral-count-bg: #e2dacd;
+  --form-hover-bg: #eee9dd;
+  --action-soft-bg: #f4e9e2;
+  --unrated: #c9bfb2;
+  --toggle-off: #cfc6ba;
+  --attention-border: #e4d7ca;
+  --attention-toggle-bg: #faf5ee;
+  --attention-icon: #8b664f;
+  --attention-small: #8f8178;
+  --outfit-preview-bg: #e5ddd1;
+  --builder-canvas-bg: #e9e2d7;
+  --empty-slot-text: #998f84;
+  --tip-bg: #eeeadf;
+  --tip-border: #d8d2c0;
+  --diary-reflection-bg: #ded9c9;
+  --reflection-icon-bg: var(--olive-deep);
+  --reflection-icon-fg: var(--on-dark);
+  --privacy-check-bg: var(--olive);
+  --privacy-check-fg: var(--on-dark);
+  --toast-success-bg: var(--sage-soft);
+  --toast-success-fg: var(--olive-deep);
+  --peach-text: var(--terracotta-deep);
+  --lilac-text: var(--olive-deep);
+  --wishlist-bg-rgb: 225, 221, 207;
+  --wishlist-text: var(--olive-deep);
+  --ready-bg-rgb: 217, 213, 196;
+  --ready-text: var(--olive-deep);
+  --feeling-good-bg: var(--sage-soft);
+  --feeling-good-text: var(--olive-deep);
+  --secondary-selection: var(--olive);
+  --secondary-selection-bg: var(--olive-soft);
+  --danger-border: #ead1cc;
+
+  --shadow-sm: 0 2px 10px rgba(var(--ink-rgb), 0.055);
+  --shadow-md: 0 14px 36px rgba(var(--ink-rgb), 0.1);
+  --shadow-lg: 0 28px 70px rgba(var(--charcoal-rgb), 0.18);
+}
+
+html[data-theme="green-lime"] {
+  color-scheme: light;
+
+  /* Archived original Dolaby palette */
+  --charcoal: #173f32;
+  --charcoal-soft: #235744;
+  --terracotta: #173f32;
+  --terracotta-deep: #235744;
+  --terracotta-soft: #d8ef92;
+  --clay: #d8ef92;
+  --olive: #95b69d;
+  --olive-deep: #426453;
+  --sage-soft: #dce9dc;
+  --olive-soft: #e3deee;
+  --stone: #eeeee8;
+  --ink: #1c2924;
+  --ink-soft: #45534d;
+  --muted: #718079;
+  --line: #dedfd8;
+  --line-dark: #cfd2ca;
+  --canvas: #f4f3ee;
+  --paper: #fffefa;
+  --paper-soft: #f9f8f3;
+  --forest: #173f32;
+  --forest-2: #235744;
+  --sage: #dce9dc;
+  --sage-strong: #95b69d;
+  --lime: #d8ef92;
+  --peach: #f4dfce;
+  --lilac: #e3deee;
+  --gold: #d69a35;
+  --red: #a64f46;
+  --red-bg: #f7e5e0;
+
+  --paper-rgb: 255, 254, 250;
+  --ink-rgb: 28, 41, 36;
+  --charcoal-rgb: 23, 63, 50;
+  --action-rgb: 23, 63, 50;
+  --action-hover-rgb: 35, 87, 68;
+  --accent-rgb: 216, 239, 146;
+  --olive-rgb: 149, 182, 157;
+  --sage-rgb: 220, 233, 220;
+  --topbar-rgb: 244, 243, 238;
+  --overlay-rgb: 17, 30, 24;
+
+  --on-dark: #ffffff;
+  --on-action: #ffffff;
+  --selection-bg: var(--lime);
+  --selection-text: var(--forest);
+  --scrollbar: #c9cdc5;
+  --button-hover-border: #afb8b0;
+  --button-hover-bg: #ffffff;
+  --brand-mark-bg: var(--forest);
+  --brand-mark-fg: var(--lime);
+  --brand-light-mark-bg: var(--lime);
+  --brand-light-mark-fg: var(--forest);
+  --tabs-bg: #eeeee8;
+  --placeholder: #a2aaa5;
+  --notice-border: #d8dfd2;
+  --notice-bg: #f3f6ef;
+  --text-faint: #939c97;
+  --text-fainter: #9aa09c;
+  --sidebar-bg: #eeeee8;
+  --nav-text: #5f6b65;
+  --nav-count-bg: #e3e5de;
+  --demo-border: #d8dfca;
+  --demo-bg-rgb: 216, 239, 146;
+  --status-dot: #7ca45b;
+  --status-dot-rgb: 124, 164, 91;
+  --avatar-bg: #d6ded1;
+  --search-text: #8c9690;
+  --hero-bg: #dfe9d9;
+  --hero-copy: #617069;
+  --muted-icon: #a0a8a3;
+  --attention-bg: #f5eee6;
+  --attention-text: #795642;
+  --attention-badge-bg-rgb: 247, 229, 224;
+  --attention-badge-text: #8d4c42;
+  --error-icon: #e89a8f;
+  --care-border: #e4d7c7;
+  --care-bg: #f5eee5;
+  --care-text: #755844;
+  --dashed-border: #b9c2ba;
+  --neutral-count-bg: #e5e5df;
+  --form-hover-bg: #f4f7f1;
+  --action-soft-bg: #f1f6ef;
+  --unrated: #c6c9c4;
+  --toggle-off: #cdd1cc;
+  --attention-border: #e4d7ca;
+  --attention-toggle-bg: #faf5ee;
+  --attention-icon: #8b664f;
+  --attention-small: #8f8178;
+  --outfit-preview-bg: #e7e9e2;
+  --builder-canvas-bg: #f1f1eb;
+  --empty-slot-text: #a0a7a2;
+  --tip-bg: #f1f5ec;
+  --tip-border: #dce5d7;
+  --diary-reflection-bg: #e7ecdf;
+  --reflection-icon-bg: var(--forest);
+  --reflection-icon-fg: var(--lime);
+  --privacy-check-bg: var(--forest);
+  --privacy-check-fg: #ffffff;
+  --toast-success-bg: var(--lime);
+  --toast-success-fg: var(--forest);
+  --peach-text: #7d4c38;
+  --lilac-text: #5d4d78;
+  --wishlist-bg-rgb: 255, 254, 250;
+  --wishlist-text: #75516f;
+  --ready-bg-rgb: 216, 239, 146;
+  --ready-text: var(--forest);
+  --feeling-good-bg: var(--lime);
+  --feeling-good-text: var(--forest);
+  --secondary-selection: var(--forest);
+  --secondary-selection-bg: #f0f5ec;
+  --danger-border: #ead1cc;
+
+  --shadow-sm: 0 2px 10px rgba(var(--ink-rgb), 0.055);
+  --shadow-md: 0 14px 36px rgba(var(--ink-rgb), 0.1);
+  --shadow-lg: 0 28px 70px rgba(18, 32, 26, 0.18);
+}

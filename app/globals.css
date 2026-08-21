@@ -68,29 +68,28 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .brand-light { color: #fff; }
 
 .brand-mark {
-  width: 28px;
-  height: 28px;
-  display: inline-flex;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 3px;
-  border: 2px solid currentColor;
-  border-radius: 8px 8px 4px 4px;
-  position: relative;
+  width: 31px;
+  height: 31px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 10px;
+  color: var(--lime);
+  background: var(--forest);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .09), 0 3px 8px rgba(23, 63, 50, .14);
 }
 
-.brand-mark::before {
-  content: "";
-  position: absolute;
-  width: 9px;
-  height: 4px;
-  border: 2px solid currentColor;
-  border-bottom: 0;
-  border-radius: 5px 5px 0 0;
-  top: -6px;
+.brand-mark svg {
+  width: 26px;
+  height: 26px;
+  overflow: visible;
 }
 
-.brand-mark i { width: 2px; height: 16px; background: currentColor; opacity: .88; }
+.brand-light .brand-mark {
+  color: var(--forest);
+  background: var(--lime);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .28), 0 4px 12px rgba(0, 0, 0, .14);
+}
 
 .button {
   border: 0;

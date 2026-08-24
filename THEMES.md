@@ -8,7 +8,7 @@ export const ACTIVE_THEME: ThemeName = "boutique";
 
 Available themes:
 
-- `boutique` — the current warm editorial palette, using stone, charcoal, terracotta, and muted olive.
+- `boutique` — the current café-lookbook palette, using espresso, walnut, oat, muted brass, and olive with clear editorial slab typography.
 - `green-lime` — the archived original palette, using forest green, sage, lime, and the original soft accent colors.
 
 To switch themes, change only `ACTIVE_THEME`, then rebuild the app. The document theme, browser theme color, and hanger favicon all follow that setting.

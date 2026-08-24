@@ -10,9 +10,9 @@ export const THEME_METADATA: Record<
   { label: string; description: string; browserColor: string; icon: string }
 > = {
   boutique: {
-    label: "Warm Boutique",
-    description: "Warm stone, charcoal, terracotta, and muted olive.",
-    browserColor: "#eee9e0",
+    label: "Walnut Boutique",
+    description: "Espresso, walnut, oat, muted brass, and olive with clear editorial slab type.",
+    browserColor: "#ece2d4",
     icon: "/theme-boutique-icon.svg",
   },
   "green-lime": {

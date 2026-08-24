@@ -41,6 +41,8 @@ Open `http://localhost:3000`. Without environment variables, Dolaby starts in de
 4. In Supabase Authentication → URL Configuration, set the Site URL to your local or production URL and add `/auth/callback` as an allowed redirect path.
 5. Restart the dev server. The sign-in and create-account forms will now use Supabase; the demo remains available as a separate option.
 
+For an existing database, do not rerun the full schema. Apply new SQL files from [`supabase/migrations`](./supabase/migrations) in timestamp order.
+
 Item uploads are resized in the browser to a maximum 1600px edge and encoded as JPEG before entering the private bucket. Database records store only storage paths; the UI creates one-hour signed URLs for display.
 
 ## Quality checks

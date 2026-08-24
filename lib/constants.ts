@@ -3,6 +3,7 @@ import type { Category, Feeling, Occasion } from "@/lib/types";
 export const CATEGORIES: { value: Category; label: string }[] = [
   { value: "top", label: "Tops" },
   { value: "bottom", label: "Bottoms" },
+  { value: "underwear", label: "Underwear" },
   { value: "outerwear", label: "Outerwear" },
   { value: "shoes", label: "Shoes" },
   { value: "accessory", label: "Accessories" },
@@ -11,6 +12,20 @@ export const CATEGORIES: { value: Category; label: string }[] = [
 export const ITEM_TYPES: Record<Category, string[]> = {
   top: ["T-shirt", "Shirt", "Polo", "Sweater", "Hoodie", "Tank top"],
   bottom: ["Jeans", "Trousers", "Chinos", "Shorts", "Skirt"],
+  underwear: [
+    "Briefs",
+    "Boxer briefs",
+    "Boxers",
+    "Trunks",
+    "Panties",
+    "Bra",
+    "Bralette",
+    "Undershirt",
+    "Camisole",
+    "Shapewear",
+    "Thermal underwear",
+    "Socks",
+  ],
   outerwear: ["Blazer", "Jacket", "Coat", "Overshirt", "Cardigan"],
   shoes: ["Sneakers", "Loafers", "Boots", "Derby shoes", "Sandals"],
   accessory: ["Watch", "Belt", "Bag", "Scarf", "Hat", "Jewelry"],

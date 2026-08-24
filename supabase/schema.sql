@@ -3,7 +3,7 @@
 
 create extension if not exists "pgcrypto";
 
-create type public.item_category as enum ('top', 'bottom', 'outerwear', 'shoes', 'accessory');
+create type public.item_category as enum ('top', 'bottom', 'underwear', 'outerwear', 'shoes', 'accessory');
 create type public.warmth_level as enum ('light', 'medium', 'heavy');
 create type public.ownership_status as enum ('own', 'want');
 create type public.store_type as enum ('online', 'physical', 'both');

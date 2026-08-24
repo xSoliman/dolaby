@@ -1,4 +1,4 @@
-export type Category = "top" | "bottom" | "outerwear" | "shoes" | "accessory";
+export type Category = "top" | "bottom" | "underwear" | "outerwear" | "shoes" | "accessory";
 export type WarmthLevel = "light" | "medium" | "heavy";
 export type OwnershipStatus = "own" | "want";
 export type StoreType = "online" | "physical" | "both";

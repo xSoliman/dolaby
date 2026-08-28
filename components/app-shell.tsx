@@ -30,7 +30,7 @@ const primaryNav = [
   { href: "/stores", label: "Stores", icon: Store },
 ];
 
-const mobileNav = primaryNav.slice(0, 4);
+const mobileNav = primaryNav;
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -166,6 +166,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <ShoppingBag size={17} />
             Log today&apos;s wear
           </Link>
+          <Link href="/closet/new" className="topbar-add" aria-label="Add item">
+            <Plus size={18} />
+          </Link>
           <span className="topbar-avatar">{initials(profile?.name ?? "D")}</span>
         </header>
         <main className="app-main">{children}</main>
@@ -182,9 +185,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </Link>
           );
         })}
-        <Link href="/closet/new" className="bottom-add" aria-label="Add item">
-          <Plus size={23} />
-        </Link>
       </nav>
 
       {searchOpen ? (

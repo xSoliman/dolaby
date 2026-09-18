@@ -5,6 +5,7 @@ import {
   Check,
   ChevronDown,
   Filter,
+  Heart,
   Plus,
   Search,
   Sparkles,
@@ -17,7 +18,9 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { useWardrobe } from "@/components/wardrobe-provider";
 import { CATEGORIES, OCCASIONS } from "@/lib/constants";
-import type { Category, Occasion } from "@/lib/types";
+import type { Category, Occasion, OwnershipStatus } from "@/lib/types";
+
+type StatusFilter = "all" | OwnershipStatus;
 
 export default function OutfitBuilderPage() {
   const router = useRouter();
@@ -29,6 +32,7 @@ export default function OutfitBuilderPage() {
   const [selected, setSelected] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<Category | "all">("all");
+  const [status, setStatus] = useState<StatusFilter>("all");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -38,16 +42,16 @@ export default function OutfitBuilderPage() {
     if (requestedEdit) {
       const outfit = outfits.find((entry) => entry.id === requestedEdit);
       if (outfit) { setEditId(outfit.id); setName(outfit.name); setOccasion(outfit.occasion); setSelected(outfit.itemIds); }
-    } else if (requestedItem && items.some((item) => item.id === requestedItem && item.ownershipStatus === "own")) {
+    } else if (requestedItem && items.some((item) => item.id === requestedItem)) {
       setSelected([requestedItem]);
     }
   }, [items, outfits]);
 
-  const owned = items.filter((item) => item.ownershipStatus === "own");
-  const visible = useMemo(() => owned.filter((item) => {
+  const visible = useMemo(() => items.filter((item) => {
+    if (status !== "all" && item.ownershipStatus !== status) return false;
     if (category !== "all" && item.category !== category) return false;
     return !query || `${item.name} ${item.type} ${item.primaryColor}`.toLowerCase().includes(query.toLowerCase());
-  }), [category, owned, query]);
+  }), [category, items, query, status]);
   const selectedItems = selected.map((id) => items.find((item) => item.id === id)).filter((item) => item !== undefined);
 
   const toggle = (id: string) => setSelected((current) => current.includes(id) ? current.filter((entry) => entry !== id) : [...current, id]);
@@ -81,15 +85,16 @@ export default function OutfitBuilderPage() {
             <OutfitPreview items={selectedItems} size="large" emptySlots />
             {!selectedItems.length ? <div className="builder-empty-copy"><span><Sparkles size={22} /></span><h2>Your canvas is empty</h2><p>Pick a top, bottom, or whatever feels right.</p></div> : null}
           </div>
-          {selectedItems.length ? <div className="selected-piece-list">{selectedItems.map((item, index) => <div key={item.id}><span>{index + 1}</span><span className="selected-thumb">{item.photos[0] ? <img src={item.photos[0]} alt="" /> : null}</span><span><strong>{item.name || item.type}</strong><small>{item.type} · {item.primaryColor}</small></span><button type="button" onClick={() => toggle(item.id)}>×</button></div>)}</div> : null}
+          {selectedItems.length ? <div className="selected-piece-list">{selectedItems.map((item, index) => <div key={item.id}><span>{index + 1}</span><span className="selected-thumb">{item.photos[0] ? <img src={item.photos[0]} alt="" /> : null}</span><span><strong>{item.name || item.type}</strong><small>{item.type} · {item.primaryColor}{item.ownershipStatus === "want" ? " · Wishlist" : ""}</small></span><button type="button" onClick={() => toggle(item.id)}>×</button></div>)}</div> : null}
         </section>
 
         <section className="builder-picker">
-          <div className="builder-section-title"><div><span className="form-step">02</span><span><strong>Choose pieces</strong><small>Only items you own appear here</small></span></div><Filter size={17} /></div>
+          <div className="builder-section-title"><div><span className="form-step">02</span><span><strong>Choose pieces</strong><small>{status === "want" ? "Only wishlist pieces appear here" : status === "own" ? "Only items you own appear here" : "Mix owned pieces with wishlist ones"}</small></span></div><Filter size={17} /></div>
           <label className="builder-search"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search your closet…" /></label>
+          <div className="builder-status"><div className="segmented-control" role="tablist" aria-label="Ownership filter">{([["all", "All pieces"], ["own", "Owned"], ["want", "Wishlist"]] as const).map(([value, label]) => <button type="button" key={value} className={status === value ? "active" : ""} onClick={() => setStatus(value)}>{label}</button>)}</div></div>
           <div className="builder-categories"><button type="button" className={category === "all" ? "active" : ""} onClick={() => setCategory("all")}>All</button>{CATEGORIES.map((entry) => <button type="button" className={category === entry.value ? "active" : ""} key={entry.value} onClick={() => setCategory(entry.value)}>{entry.label}</button>)}</div>
           <div className="builder-item-grid">
-            {visible.map((item) => { const active = selected.includes(item.id); return <button type="button" className={active ? "selected" : ""} key={item.id} onClick={() => toggle(item.id)}><span className="builder-item-photo">{item.photos[0] ? <img src={item.photos[0]} alt="" /> : null}<i>{active ? <Check size={14} /> : <Plus size={14} />}</i></span><strong>{item.name || item.type}</strong><small>{item.type} · {item.primaryColor}</small></button>; })}
+            {visible.map((item) => { const active = selected.includes(item.id); return <button type="button" className={active ? "selected" : ""} key={item.id} onClick={() => toggle(item.id)}><span className="builder-item-photo">{item.photos[0] ? <img src={item.photos[0]} alt="" /> : null}{item.ownershipStatus === "want" ? <span className="badge badge-want"><Heart size={12} /> Wishlist</span> : null}<i>{active ? <Check size={14} /> : <Plus size={14} />}</i></span><strong>{item.name || item.type}</strong><small>{item.type} · {item.primaryColor}</small></button>; })}
             {!visible.length ? <p className="builder-no-results">No pieces match this view.</p> : null}
           </div>
         </section>

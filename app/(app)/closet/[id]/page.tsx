@@ -17,6 +17,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { ItemForm } from "@/components/closet/item-form";
+import { ItemDetailSkeleton } from "@/components/closet/item-detail-skeleton";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { useToast } from "@/components/ui/toast";
@@ -27,12 +28,16 @@ import { formatDate, formatMoney } from "@/lib/format";
 export default function ItemDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { items, stores, outfits, deleteItem } = useWardrobe();
+  const { items, stores, outfits, deleteItem, loading } = useWardrobe();
   const { notify } = useToast();
   const item = items.find((entry) => entry.id === params.id);
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [activePhoto, setActivePhoto] = useState(0);
+
+  if (loading && !item) {
+    return <ItemDetailSkeleton />;
+  }
 
   if (!item) {
     return <div className="not-found-card"><h1>That piece isn&apos;t here.</h1><p>It may have been removed from your wardrobe.</p><Link className="button button-secondary button-md" href="/closet">Back to my closet</Link></div>;

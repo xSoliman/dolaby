@@ -1,6 +1,6 @@
 import { getSupabaseServiceClient } from "@/lib/supabase/server";
 import { isShareToken, toSharedPayload } from "@/lib/sharing";
-import type { Item, Outfit } from "@/lib/types";
+import type { Item, Outfit, Store } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +40,17 @@ interface SharedOutfitRow {
   outfit_items: { item_id: string }[] | null;
 }
 
+interface SharedStoreRow {
+  id: string;
+  name: string;
+  type: Store["type"] | null;
+  url: string | null;
+  location: string | null;
+  photo_path: string | null;
+  note: string | null;
+  created_at: string;
+}
+
 const notActive = () => Response.json({ error: "This link is no longer active." }, { status: 404 });
 
 export async function GET(
@@ -69,7 +80,7 @@ export async function GET(
   const shareRow = share as ShareRow | null;
   if (!shareRow) return notActive();
 
-  const [profileResult, itemsResult, outfitsResult] = await Promise.all([
+  const [profileResult, itemsResult, outfitsResult, storesResult] = await Promise.all([
     supabase.from("profiles").select("name").eq("id", shareRow.user_id).maybeSingle(),
     supabase
       .from("items")
@@ -81,16 +92,28 @@ export async function GET(
       .select("*, outfit_items(item_id)")
       .eq("user_id", shareRow.user_id)
       .order("created_at", { ascending: false }),
+    supabase
+      .from("stores")
+      .select("*")
+      .eq("user_id", shareRow.user_id)
+      .order("name"),
   ]);
 
-  if (itemsResult.error || outfitsResult.error) {
-    console.error("Shared wardrobe load failed:", itemsResult.error ?? outfitsResult.error);
+  if (itemsResult.error || outfitsResult.error || storesResult.error) {
+    console.error(
+      "Shared wardrobe load failed:",
+      itemsResult.error ?? outfitsResult.error ?? storesResult.error,
+    );
     return Response.json({ error: "Could not load this wardrobe." }, { status: 500 });
   }
 
   const itemRows = (itemsResult.data ?? []) as SharedItemRow[];
   const outfitRows = (outfitsResult.data ?? []) as SharedOutfitRow[];
-  const paths = itemRows.flatMap((row) => (row.item_photos ?? []).map((photo) => photo.storage_path));
+  const storeRows = (storesResult.data ?? []) as SharedStoreRow[];
+  const paths = [
+    ...itemRows.flatMap((row) => (row.item_photos ?? []).map((photo) => photo.storage_path)),
+    ...storeRows.flatMap((row) => (row.photo_path ? [row.photo_path] : [])),
+  ];
 
   let urlMap = new Map<string, string>();
   if (paths.length) {
@@ -138,10 +161,22 @@ export async function GET(
     createdAt: row.created_at,
   }));
 
+  const stores: Store[] = storeRows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    type: row.type ?? "both",
+    url: row.url ?? "",
+    location: row.location ?? "",
+    photo: row.photo_path ? urlMap.get(row.photo_path) ?? "" : "",
+    photoPath: row.photo_path ?? undefined,
+    note: row.note ?? "",
+    createdAt: row.created_at,
+  }));
+
   const profile = profileResult.data as { name: string } | null;
 
   return Response.json({
     ownerName: profile?.name || "A shared wardrobe",
-    ...toSharedPayload(items, outfits),
+    ...toSharedPayload(items, outfits, stores),
   });
 }

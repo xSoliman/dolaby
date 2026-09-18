@@ -61,7 +61,7 @@ export function ShareControls() {
           <span>
             <strong>{busy ? "Creating your link…" : "Create a share link"}</strong>
             <small>
-              Anyone with the link can view your pieces and ready outfits. Your wear diary stays
+              Anyone with the link can view your pieces, outfits, and stores. Your wear diary stays
               private.
             </small>
           </span>
@@ -88,7 +88,7 @@ export function ShareControls() {
           <strong>{share.isEnabled ? "Link is active" : "Link is off"}</strong>
           <small>
             {share.isEnabled
-              ? "Anyone with the link can view your pieces and ready outfits."
+              ? "Anyone with the link can view your pieces, outfits, and stores."
               : "Visitors see an inactive message until you turn the link back on."}
           </small>
         </p>

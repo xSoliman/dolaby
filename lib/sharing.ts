@@ -1,4 +1,4 @@
-import type { Item, Outfit, WardrobeShare } from "@/lib/types";
+import type { Item, Outfit, Store, WardrobeShare } from "@/lib/types";
 
 export const SHARE_TOKEN_PATTERN = /^[0-9a-f]{32}$/;
 
@@ -23,13 +23,14 @@ export interface SharedWardrobe {
   ownerName: string;
   items: Item[];
   outfits: Outfit[];
+  stores: Store[];
 }
 
 /**
- * The shape a shared wardrobe takes on the wire. Wear history, stores, and
- * shopping details stay private; viewers see pieces and ready outfits only.
+ * The shape a shared wardrobe takes on the wire. Wear history and shopping
+ * details stay private; viewers see pieces, ready outfits, and stores only.
  */
-export function toSharedPayload(items: Item[], outfits: Outfit[]): Pick<SharedWardrobe, "items" | "outfits"> {
+export function toSharedPayload(items: Item[], outfits: Outfit[], stores: Store[]): Omit<SharedWardrobe, "ownerName"> {
   return {
     items: items.map((item) => ({
       ...item,
@@ -39,6 +40,7 @@ export function toSharedPayload(items: Item[], outfits: Outfit[]): Pick<SharedWa
       candidateStoreIds: [],
     })),
     outfits: outfits.filter((outfit) => !outfit.isDraft),
+    stores,
   };
 }
 

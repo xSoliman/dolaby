@@ -3,13 +3,18 @@
 import {
   AlertCircle,
   CheckCircle2,
+  ExternalLink,
   Eye,
+  Globe2,
   Heart,
   Link2,
   LockKeyhole,
+  MapPin,
   Search,
   Shirt,
+  Sparkles,
   Star,
+  Store as StoreIcon,
   ThermometerSun,
   Wrench,
   X,
@@ -24,10 +29,11 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Modal } from "@/components/ui/modal";
 import { CATEGORIES, COLOR_HEX, formatCategory, formatOccasion } from "@/lib/constants";
 import { demoShareFromStorage, toSharedPayload } from "@/lib/sharing";
-import type { Category, Item, Outfit, OwnershipStatus, WardrobeData } from "@/lib/types";
+import type { Category, Item, Outfit, OwnershipStatus, Store, WardrobeData } from "@/lib/types";
 import type { SharedWardrobe } from "@/lib/sharing";
 
 type StatusFilter = "all" | OwnershipStatus;
+type Section = "items" | "outfits" | "stores";
 
 export default function SharedWardrobePage() {
   const params = useParams<{ token: string }>();
@@ -38,10 +44,14 @@ export default function SharedWardrobePage() {
   const [ownerName, setOwnerName] = useState("");
   const [items, setItems] = useState<Item[]>([]);
   const [outfits, setOutfits] = useState<Outfit[]>([]);
+  const [stores, setStores] = useState<Store[]>([]);
+  const [section, setSection] = useState<Section>("items");
   const [tab, setTab] = useState<StatusFilter>("all");
   const [category, setCategory] = useState<Category | "all">("all");
   const [query, setQuery] = useState("");
+  const [storeQuery, setStoreQuery] = useState("");
   const [selected, setSelected] = useState<Item | null>(null);
+  const [viewingStore, setViewingStore] = useState<Store | null>(null);
   const [activePhoto, setActivePhoto] = useState(0);
 
   useEffect(() => {
@@ -56,6 +66,7 @@ export default function SharedWardrobePage() {
             setOwnerName(payload.ownerName);
             setItems(payload.items);
             setOutfits(payload.outfits);
+            setStores(payload.stores);
             setStatus("ready");
           }
           return;
@@ -71,11 +82,12 @@ export default function SharedWardrobePage() {
             const saved = window.localStorage.getItem("dolaby.wardrobe.v1");
             if (saved) {
               const data = JSON.parse(saved) as WardrobeData;
-              const payload = toSharedPayload(data.items, data.outfits);
+              const payload = toSharedPayload(data.items, data.outfits, data.stores);
               // Mirrors the demo profile name in WardrobeProvider.
               setOwnerName("Nour Hassan");
               setItems(payload.items);
               setOutfits(payload.outfits);
+              setStores(payload.stores);
               setStatus("ready");
               return;
             }
@@ -107,6 +119,14 @@ export default function SharedWardrobePage() {
     });
     return result.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }, [category, items, query, tab]);
+
+  const visibleStores = useMemo(() => {
+    const needle = storeQuery.trim().toLowerCase();
+    if (!needle) return stores;
+    return stores.filter((store) =>
+      `${store.name} ${store.location} ${store.note}`.toLowerCase().includes(needle),
+    );
+  }, [storeQuery, stores]);
 
   if (status === "loading") {
     return (
@@ -189,7 +209,8 @@ export default function SharedWardrobePage() {
             <h1>{ownerName}&rsquo;s closet</h1>
             <p>
               {owned} {owned === 1 ? "piece" : "pieces"} owned · {wanted} on the wishlist ·{" "}
-              {outfits.length} {outfits.length === 1 ? "ready outfit" : "ready outfits"}
+              {outfits.length} {outfits.length === 1 ? "ready outfit" : "ready outfits"} ·{" "}
+              {stores.length} {stores.length === 1 ? "store" : "stores"}
             </p>
           </div>
           <div className="share-count">
@@ -201,6 +222,10 @@ export default function SharedWardrobePage() {
               <strong>{outfits.length}</strong>
               <small>outfits</small>
             </div>
+            <div>
+              <strong>{stores.length}</strong>
+              <small>stores</small>
+            </div>
           </div>
         </div>
 
@@ -210,6 +235,27 @@ export default function SharedWardrobePage() {
         </p>
 
         <div className="closet-tabs" role="tablist">
+          {(
+            [
+              ["items", "Closet", items.length],
+              ["outfits", "Outfits", outfits.length],
+              ["stores", "Stores", stores.length],
+            ] as const
+          ).map(([value, label, count]) => (
+            <button
+              key={value}
+              className={section === value ? "active" : ""}
+              onClick={() => setSection(value)}
+            >
+              {label}
+              <span>{count}</span>
+            </button>
+          ))}
+        </div>
+
+        {section === "items" ? (
+          <>
+            <div className="closet-tabs" role="tablist">
           {(
             [
               ["all", "Everything", items.length],
@@ -291,7 +337,7 @@ export default function SharedWardrobePage() {
                   </span>
                 </span>
                 <span className="item-card-info">
-                  <span>
+                  <span className="share-card-text">
                     <h3>{item.name || item.type}</h3>
                     <p>
                       {item.type} · {item.material || "Material not set"}
@@ -331,8 +377,11 @@ export default function SharedWardrobePage() {
             }
           />
         )}
+          </>
+        ) : null}
 
-        {outfits.length ? (
+        {section === "outfits" ? (
+          outfits.length ? (
           <section className="dashboard-section">
             <div className="section-heading">
               <div>
@@ -373,6 +422,84 @@ export default function SharedWardrobePage() {
               })}
             </div>
           </section>
+          ) : (
+            <EmptyState
+              icon={Sparkles}
+              title="No shared outfits yet"
+              copy={`${ownerName} hasn't marked any outfit as ready yet.`}
+            />
+          )
+        ) : null}
+
+        {section === "stores" ? (
+          <>
+            <label className="stores-search">
+              <Search size={18} />
+              <input
+                value={storeQuery}
+                onChange={(event) => setStoreQuery(event.target.value)}
+                placeholder="Search stores, locations, or notes…"
+              />
+              {storeQuery ? (
+                <button onClick={() => setStoreQuery("")} aria-label="Clear search">
+                  <X size={15} />
+                </button>
+              ) : null}
+            </label>
+
+            {visibleStores.length ? (
+              <div className="stores-grid">
+                {visibleStores.map((store) => (
+                  <article className="store-card" key={store.id}>
+                    <button className="store-card-main" onClick={() => setViewingStore(store)}>
+                      <span className="store-image">
+                        {store.photo ? <img src={store.photo} alt="" /> : <StoreIcon size={28} />}
+                      </span>
+                      <span className="store-card-copy">
+                        <span className="store-type">
+                          {store.type === "both" ? "Online & physical" : store.type}
+                        </span>
+                        <strong>{store.name}</strong>
+                        <small>
+                          {store.location || store.url.replace(/^https?:\/\//, "") || "No location added"}
+                        </small>
+                      </span>
+                    </button>
+                    <div className="store-card-footer">
+                      <span>
+                        <MapPin size={14} /> {store.location || "Online only"}
+                      </span>
+                      {store.url ? (
+                        <a href={store.url} target="_blank" rel="noreferrer">
+                          <ExternalLink size={14} /> Website
+                        </a>
+                      ) : null}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon={stores.length ? Search : StoreIcon}
+                title={stores.length ? "No stores match that search" : "No shared stores yet"}
+                copy={
+                  stores.length
+                    ? "Try a name, location, or something from the notes."
+                    : `${ownerName} hasn't shared any stores or brands yet.`
+                }
+                action={
+                  stores.length ? (
+                    <button
+                      className="button button-secondary button-md"
+                      onClick={() => setStoreQuery("")}
+                    >
+                      Clear search
+                    </button>
+                  ) : undefined
+                }
+              />
+            )}
+          </>
         ) : null}
 
         <Modal
@@ -458,6 +585,62 @@ export default function SharedWardrobePage() {
                   </div>
                 </dl>
               </div>
+            </div>
+          ) : null}
+        </Modal>
+
+        <Modal
+          open={Boolean(viewingStore)}
+          onClose={() => setViewingStore(null)}
+          title={viewingStore?.name ?? "Store"}
+          eyebrow={
+            viewingStore ? (viewingStore.type === "both" ? "Online & physical" : viewingStore.type) : ""
+          }
+        >
+          {viewingStore ? (
+            <div className="store-detail-modal">
+              <div className="store-detail-photo">
+                {viewingStore.photo ? (
+                  <img src={viewingStore.photo} alt={viewingStore.name} />
+                ) : (
+                  <StoreIcon size={32} />
+                )}
+              </div>
+              {viewingStore.note ? <p className="store-quote">&ldquo;{viewingStore.note}&rdquo;</p> : null}
+              <dl>
+                <div>
+                  <dt>
+                    <MapPin size={15} /> Location
+                  </dt>
+                  <dd>{viewingStore.location || "Not added"}</dd>
+                </div>
+                <div>
+                  <dt>
+                    <Globe2 size={15} /> Website
+                  </dt>
+                  <dd>
+                    {viewingStore.url ? (
+                      <a href={viewingStore.url} target="_blank" rel="noreferrer">
+                        Visit website <ExternalLink size={13} />
+                      </a>
+                    ) : (
+                      "Not added"
+                    )}
+                  </dd>
+                </div>
+              </dl>
+              {viewingStore.url ? (
+                <div className="modal-form-actions">
+                  <a
+                    className="button button-primary button-md"
+                    href={viewingStore.url}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Open store <ExternalLink size={14} />
+                  </a>
+                </div>
+              ) : null}
             </div>
           ) : null}
         </Modal>

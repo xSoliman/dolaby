@@ -54,8 +54,8 @@ Item uploads are resized in the browser to a maximum 1600px edge and encoded as 
 ## Sharing
 
 Settings → Sharing creates one read-only link per wardrobe (`/s/[token]`). Viewers
-see pieces and ready outfits with photos; the wear diary, stores, and shopping
-details stay private. The owner can turn the link off or generate a new one at
+see pieces, ready outfits, and stores with photos across Closet/Outfits/Stores
+tabs; the wear diary and shopping details stay private. The owner can turn the link off or generate a new one at
 any time, which immediately invalidates the old link. In demo mode the link
 previews the demo wardrobe on the same device only.
 

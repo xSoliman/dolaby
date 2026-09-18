@@ -32,15 +32,15 @@ export interface SharedWardrobe {
  */
 export function toSharedPayload(items: Item[], outfits: Outfit[], stores: Store[]): Omit<SharedWardrobe, "ownerName"> {
   return {
-    items: items.map((item) => ({
+    items: items.filter((item) => !item.isArchived).map((item) => ({
       ...item,
       price: null,
       acquiredDate: "",
       sourceStoreId: null,
       candidateStoreIds: [],
     })),
-    outfits: outfits.filter((outfit) => !outfit.isDraft),
-    stores,
+    outfits: outfits.filter((outfit) => !outfit.isDraft && !outfit.isArchived),
+    stores: stores.filter((store) => !store.isArchived),
   };
 }
 

@@ -78,4 +78,5 @@ Import the repository into Vercel, add the two public Supabase environment varia
 - Outfit/item and wear-entry/item relations use join tables.
 - Every entity and join row includes `user_id`; row-level policies compare it with `auth.uid()`.
 - One wardrobe has at most one share row in `wardrobe_shares`; viewing happens through the service-role share API, never through anonymous table access.
+- Archiving is a per-row `is_archived` flag on items, stores, and outfits. Archived rows leave every active view, count, builder, diary picker, and share link, and can be restored from their own Archived views. Wear entries are history and are never archived.
 - Structured tags, suggestions, gap analysis, care workflows, and shopping workflows remain intentionally outside v1.

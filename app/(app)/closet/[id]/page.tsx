@@ -2,6 +2,7 @@
 
 import {
   AlertCircle,
+  Archive,
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
@@ -23,12 +24,12 @@ import { Modal } from "@/components/ui/modal";
 import { useToast } from "@/components/ui/toast";
 import { useWardrobe } from "@/components/wardrobe-provider";
 import { formatCategory } from "@/lib/constants";
-import { formatDate, formatMoney } from "@/lib/format";
+import { errorMessage, formatDate, formatMoney } from "@/lib/format";
 
 export default function ItemDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { items, stores, outfits, deleteItem, loading } = useWardrobe();
+  const { items, stores, outfits, deleteItem, setItemArchived, loading } = useWardrobe();
   const { notify } = useToast();
   const item = items.find((entry) => entry.id === params.id);
   const [editing, setEditing] = useState(false);
@@ -68,11 +69,20 @@ export default function ItemDetailPage() {
     }
   };
 
+  const toggleArchive = async () => {
+    try {
+      await setItemArchived(item.id, !item.isArchived);
+      notify(item.isArchived ? "Item restored to your closet." : "Item archived.");
+    } catch (error) {
+      notify(errorMessage(error, "Could not update this item."), "error");
+    }
+  };
+
   return (
     <div className="item-detail-page">
       <div className="detail-topline">
         <Link href="/closet" className="back-link"><ArrowLeft size={16} /> My closet</Link>
-        <div><Button variant="secondary" onClick={() => setEditing(true)}><Pencil size={15} /> Edit item</Button><button className="icon-button danger-icon" onClick={() => setDeleting(true)} aria-label="Delete item"><Trash2 size={17} /></button></div>
+        <div><Button variant="secondary" onClick={() => setEditing(true)}><Pencil size={15} /> Edit item</Button><Button variant="secondary" onClick={() => void toggleArchive()}><Archive size={15} /> {item.isArchived ? "Unarchive" : "Archive"}</Button><button className="icon-button danger-icon" onClick={() => setDeleting(true)} aria-label="Delete item"><Trash2 size={17} /></button></div>
       </div>
 
       <div className="item-detail-grid">

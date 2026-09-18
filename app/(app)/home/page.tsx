@@ -19,14 +19,15 @@ import { formatDate } from "@/lib/format";
 export default function HomePage() {
   const { profile, items, outfits, wearEntries } = useWardrobe();
   const firstName = profile?.name.split(" ")[0] ?? "there";
-  const owned = items.filter((item) => item.ownershipStatus === "own");
-  const wishlist = items.filter((item) => item.ownershipStatus === "want");
+  const owned = items.filter((item) => item.ownershipStatus === "own" && !item.isArchived);
+  const wishlist = items.filter((item) => item.ownershipStatus === "want" && !item.isArchived);
   const attention = owned.filter((item) => item.needsAttention);
-  const featured = outfits.find((outfit) => !outfit.isDraft) ?? outfits[0];
+  const activeOutfits = outfits.filter((outfit) => !outfit.isArchived);
+  const featured = activeOutfits.find((outfit) => !outfit.isDraft) ?? activeOutfits[0];
   const featuredItems = featured
     ? featured.itemIds.map((id) => items.find((item) => item.id === id)).filter(Boolean)
     : [];
-  const recent = [...items].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 4);
+  const recent = [...items].filter((item) => !item.isArchived).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 4);
   const lastWear = wearEntries[0];
   const lastOutfit = outfits.find((outfit) => outfit.id === lastWear?.outfitId);
 
@@ -88,7 +89,7 @@ export default function HomePage() {
             </Link>
             <Link href="/outfits">
               <span className="stat-icon peach"><Sparkles size={18} /></span>
-              <span><strong>{outfits.filter((outfit) => !outfit.isDraft).length}</strong><small>Ready outfits</small></span>
+              <span><strong>{activeOutfits.filter((outfit) => !outfit.isDraft).length}</strong><small>Ready outfits</small></span>
               <ArrowRight size={15} />
             </Link>
             <Link href="/closet?status=want">

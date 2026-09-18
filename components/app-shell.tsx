@@ -69,6 +69,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const results = query.trim()
     ? items
         .filter((item) =>
+          !item.isArchived &&
           `${item.name} ${item.type} ${item.primaryColor}`.toLowerCase().includes(query.toLowerCase()),
         )
         .slice(0, 5)
@@ -100,7 +101,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Link href={entry.href} className={active ? "active" : ""} key={entry.href}>
               <Icon size={19} strokeWidth={active ? 2.1 : 1.7} />
               <span>{entry.label}</span>
-              {entry.href === "/closet" ? <small>{items.length}</small> : null}
+              {entry.href === "/closet" ? <small>{items.filter((item) => !item.isArchived).length}</small> : null}
             </Link>
           );
         })}

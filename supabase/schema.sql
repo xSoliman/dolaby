@@ -27,6 +27,7 @@ create table public.stores (
   photo_path text,
   note text check (char_length(note) <= 2000),
   created_at timestamptz not null default now(),
+  is_archived boolean not null default false,
   unique (id, user_id)
 );
 
@@ -49,6 +50,7 @@ create table public.items (
   source_store_id uuid,
   note text check (char_length(note) <= 4000),
   created_at timestamptz not null default now(),
+  is_archived boolean not null default false,
   unique (id, user_id),
   foreign key (source_store_id, user_id)
     references public.stores(id, user_id)
@@ -84,6 +86,7 @@ create table public.outfits (
   occasion public.occasion not null,
   is_draft boolean not null default true,
   created_at timestamptz not null default now(),
+  is_archived boolean not null default false,
   unique (id, user_id)
 );
 

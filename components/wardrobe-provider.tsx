@@ -45,12 +45,15 @@ interface WardrobeContextValue extends WardrobeData {
   addItem: (draft: ItemDraft) => Promise<Item>;
   updateItem: (id: string, draft: ItemDraft) => Promise<Item>;
   deleteItem: (id: string) => Promise<void>;
+  setItemArchived: (id: string, archived: boolean) => Promise<void>;
   addStore: (draft: StoreDraft) => Promise<Store>;
   updateStore: (id: string, draft: StoreDraft) => Promise<Store>;
   deleteStore: (id: string) => Promise<void>;
+  setStoreArchived: (id: string, archived: boolean) => Promise<void>;
   addOutfit: (draft: OutfitDraft) => Promise<Outfit>;
   updateOutfit: (id: string, draft: OutfitDraft) => Promise<Outfit>;
   deleteOutfit: (id: string) => Promise<void>;
+  setOutfitArchived: (id: string, archived: boolean) => Promise<void>;
   addWearEntry: (draft: WearEntryDraft) => Promise<WearEntry>;
   deleteWearEntry: (id: string) => Promise<void>;
   share: WardrobeShare | null;
@@ -86,6 +89,7 @@ interface DbItem {
   acquired_date: string | null;
   source_store_id: string | null;
   note: string | null;
+  is_archived: boolean | null;
   created_at: string;
   item_photos: DbPhoto[] | null;
   item_store_candidates: DbStoreLink[] | null;
@@ -99,6 +103,7 @@ interface DbStore {
   location: string | null;
   photo_path: string | null;
   note: string | null;
+  is_archived: boolean | null;
   created_at: string;
 }
 
@@ -107,6 +112,7 @@ interface DbOutfit {
   name: string | null;
   occasion: Outfit["occasion"];
   is_draft: boolean;
+  is_archived: boolean | null;
   created_at: string;
   outfit_items: { item_id: string }[] | null;
 }
@@ -252,6 +258,7 @@ export function WardrobeProvider({ children }: { children: React.ReactNode }) {
             sourceStoreId: row.source_store_id,
             candidateStoreIds: (row.item_store_candidates ?? []).map((link) => link.store_id),
             note: row.note ?? "",
+            isArchived: row.is_archived ?? false,
             photos: photos.map((photo) => urlMap.get(photo.storage_path) ?? ""),
             photoPaths: photos.map((photo) => photo.storage_path),
             createdAt: row.created_at,
@@ -266,6 +273,7 @@ export function WardrobeProvider({ children }: { children: React.ReactNode }) {
           photo: row.photo_path ? urlMap.get(row.photo_path) ?? "" : "",
           photoPath: row.photo_path ?? undefined,
           note: row.note ?? "",
+          isArchived: row.is_archived ?? false,
           createdAt: row.created_at,
         })),
         outfits: ((outfitsResult.data ?? []) as DbOutfit[]).map((row) => ({
@@ -274,6 +282,7 @@ export function WardrobeProvider({ children }: { children: React.ReactNode }) {
           occasion: row.occasion,
           isDraft: row.is_draft,
           itemIds: (row.outfit_items ?? []).map((link) => link.item_id),
+          isArchived: row.is_archived ?? false,
           createdAt: row.created_at,
         })),
         wearEntries: ((wearResult.data ?? []) as DbWearEntry[]).map((row) => ({
@@ -470,7 +479,7 @@ export function WardrobeProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    const item: Item = { ...draft, id, photos, photoPaths, createdAt };
+    const item: Item = { ...draft, id, photos, photoPaths, isArchived: false, createdAt };
     setData((current) => ({ ...current, items: [item, ...current.items] }));
     return item;
   };
@@ -567,6 +576,18 @@ export function WardrobeProvider({ children }: { children: React.ReactNode }) {
     }));
   };
 
+  const setItemArchived = async (id: string, archived: boolean) => {
+    const remote = requireRemote();
+    if (remote) {
+      const { error } = await remote.supabase.from("items").update({ is_archived: archived }).eq("id", id);
+      if (error) throw error;
+    }
+    setData((current) => ({
+      ...current,
+      items: current.items.map((item) => (item.id === id ? { ...item, isArchived: archived } : item)),
+    }));
+  };
+
   const addStore = async (draft: StoreDraft) => {
     const id = crypto.randomUUID();
     const createdAt = new Date().toISOString();
@@ -593,7 +614,7 @@ export function WardrobeProvider({ children }: { children: React.ReactNode }) {
       if (photoPath) photo = (await signedUrls([photoPath])).get(photoPath) ?? "";
       else photo = "";
     }
-    const store: Store = { ...draft, id, photo, photoPath, createdAt };
+    const store: Store = { ...draft, id, photo, photoPath, isArchived: false, createdAt };
     setData((current) => ({ ...current, stores: [store, ...current.stores] }));
     return store;
   };
@@ -661,6 +682,23 @@ export function WardrobeProvider({ children }: { children: React.ReactNode }) {
     }));
   };
 
+  const setStoreArchived = async (id: string, archived: boolean) => {
+    const remote = requireRemote();
+    if (remote) {
+      const { error } = await remote.supabase
+        .from("stores")
+        .update({ is_archived: archived })
+        .eq("id", id);
+      if (error) throw error;
+    }
+    setData((current) => ({
+      ...current,
+      stores: current.stores.map((store) =>
+        store.id === id ? { ...store, isArchived: archived } : store,
+      ),
+    }));
+  };
+
   const addOutfit = async (draft: OutfitDraft) => {
     const id = crypto.randomUUID();
     const createdAt = new Date().toISOString();
@@ -684,7 +722,7 @@ export function WardrobeProvider({ children }: { children: React.ReactNode }) {
       );
       if (linksError) throw linksError;
     }
-    const outfit: Outfit = { ...draft, id, createdAt };
+    const outfit: Outfit = { ...draft, id, isArchived: false, createdAt };
     setData((current) => ({ ...current, outfits: [outfit, ...current.outfits] }));
     return outfit;
   };
@@ -729,6 +767,23 @@ export function WardrobeProvider({ children }: { children: React.ReactNode }) {
       outfits: current.outfits.filter((outfit) => outfit.id !== id),
       wearEntries: current.wearEntries.map((entry) =>
         entry.outfitId === id ? { ...entry, outfitId: null } : entry,
+      ),
+    }));
+  };
+
+  const setOutfitArchived = async (id: string, archived: boolean) => {
+    const remote = requireRemote();
+    if (remote) {
+      const { error } = await remote.supabase
+        .from("outfits")
+        .update({ is_archived: archived })
+        .eq("id", id);
+      if (error) throw error;
+    }
+    setData((current) => ({
+      ...current,
+      outfits: current.outfits.map((outfit) =>
+        outfit.id === id ? { ...outfit, isArchived: archived } : outfit,
       ),
     }));
   };
@@ -854,12 +909,15 @@ export function WardrobeProvider({ children }: { children: React.ReactNode }) {
       addItem,
       updateItem,
       deleteItem,
+      setItemArchived,
       addStore,
       updateStore,
       deleteStore,
+      setStoreArchived,
       addOutfit,
       updateOutfit,
       deleteOutfit,
+      setOutfitArchived,
       addWearEntry,
       deleteWearEntry,
       share,

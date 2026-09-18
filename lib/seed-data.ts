@@ -8,6 +8,7 @@ export const seedData: WardrobeData = {
     {
       id: "store-1",
       name: "COS",
+      isArchived: false,
       type: "both",
       url: "https://www.cos.com",
       location: "Citystars, Cairo",
@@ -18,6 +19,7 @@ export const seedData: WardrobeData = {
     {
       id: "store-2",
       name: "Local Loom",
+      isArchived: false,
       type: "online",
       url: "https://example.com",
       location: "Cairo",
@@ -28,6 +30,7 @@ export const seedData: WardrobeData = {
     {
       id: "store-3",
       name: "Massimo Dutti",
+      isArchived: false,
       type: "both",
       url: "https://www.massimodutti.com",
       location: "Mall of Egypt",
@@ -40,6 +43,7 @@ export const seedData: WardrobeData = {
     {
       id: "item-1",
       name: "Everyday white tee",
+      isArchived: false,
       category: "top",
       type: "T-shirt",
       primaryColor: "White",
@@ -61,6 +65,7 @@ export const seedData: WardrobeData = {
     {
       id: "item-2",
       name: "Ink linen shirt",
+      isArchived: false,
       category: "top",
       type: "Shirt",
       primaryColor: "Navy",
@@ -82,6 +87,7 @@ export const seedData: WardrobeData = {
     {
       id: "item-3",
       name: "Straight blue denim",
+      isArchived: false,
       category: "bottom",
       type: "Jeans",
       primaryColor: "Blue",
@@ -103,6 +109,7 @@ export const seedData: WardrobeData = {
     {
       id: "item-4",
       name: "Sand pleated trousers",
+      isArchived: false,
       category: "bottom",
       type: "Trousers",
       primaryColor: "Beige",
@@ -124,6 +131,7 @@ export const seedData: WardrobeData = {
     {
       id: "item-5",
       name: "Olive field jacket",
+      isArchived: false,
       category: "outerwear",
       type: "Jacket",
       primaryColor: "Olive",
@@ -145,6 +153,7 @@ export const seedData: WardrobeData = {
     {
       id: "item-6",
       name: "Chocolate loafers",
+      isArchived: false,
       category: "shoes",
       type: "Loafers",
       primaryColor: "Brown",
@@ -166,6 +175,7 @@ export const seedData: WardrobeData = {
     {
       id: "item-7",
       name: "White court sneakers",
+      isArchived: false,
       category: "shoes",
       type: "Sneakers",
       primaryColor: "White",
@@ -187,6 +197,7 @@ export const seedData: WardrobeData = {
     {
       id: "item-8",
       name: "Soft black blazer",
+      isArchived: false,
       category: "outerwear",
       type: "Blazer",
       primaryColor: "Black",
@@ -210,6 +221,7 @@ export const seedData: WardrobeData = {
     {
       id: "outfit-1",
       name: "Easy Thursday",
+      isArchived: false,
       occasion: "work",
       isDraft: false,
       itemIds: ["item-2", "item-4", "item-6"],
@@ -218,6 +230,7 @@ export const seedData: WardrobeData = {
     {
       id: "outfit-2",
       name: "Coffee & errands",
+      isArchived: false,
       occasion: "casual",
       isDraft: false,
       itemIds: ["item-1", "item-3", "item-5", "item-7"],
@@ -226,6 +239,7 @@ export const seedData: WardrobeData = {
     {
       id: "outfit-3",
       name: "Dinner, maybe",
+      isArchived: false,
       occasion: "date_night",
       isDraft: true,
       itemIds: ["item-2", "item-3", "item-6"],

@@ -25,10 +25,11 @@ export interface Item {
   note: string;
   photos: string[];
   photoPaths?: string[];
+  isArchived: boolean;
   createdAt: string;
 }
 
-export type ItemDraft = Omit<Item, "id" | "createdAt" | "photoPaths">;
+export type ItemDraft = Omit<Item, "id" | "createdAt" | "photoPaths" | "isArchived">;
 
 export interface Store {
   id: string;
@@ -39,10 +40,11 @@ export interface Store {
   photo: string;
   photoPath?: string;
   note: string;
+  isArchived: boolean;
   createdAt: string;
 }
 
-export type StoreDraft = Omit<Store, "id" | "createdAt" | "photoPath">;
+export type StoreDraft = Omit<Store, "id" | "createdAt" | "photoPath" | "isArchived">;
 
 export interface Outfit {
   id: string;
@@ -50,10 +52,11 @@ export interface Outfit {
   occasion: Occasion;
   isDraft: boolean;
   itemIds: string[];
+  isArchived: boolean;
   createdAt: string;
 }
 
-export type OutfitDraft = Omit<Outfit, "id" | "createdAt">;
+export type OutfitDraft = Omit<Outfit, "id" | "createdAt" | "isArchived">;
 
 export interface WearEntry {
   id: string;

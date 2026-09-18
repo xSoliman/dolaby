@@ -447,6 +447,7 @@ kbd { font: inherit; font-size: 9px; border: 1px solid rgba(var(--paper-rgb),.24
 .badge { height: 22px; border-radius: 20px; padding: 0 8px; display: inline-flex; align-items: center; gap: 4px; backdrop-filter: blur(6px); font-size: 7px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; }
 .badge-want { background: rgba(var(--wishlist-bg-rgb),.92); color: var(--wishlist-text); }
 .badge-attention { background: rgba(var(--attention-badge-bg-rgb),.93); color: var(--attention-badge-text); }
+.badge-archived { background: var(--stone); color: var(--ink-soft); }
 .card-more { position: absolute; top: 8px; right: 8px; width: 29px; height: 29px; border-radius: 50%; border: 0; background: rgba(var(--paper-rgb),.88); backdrop-filter: blur(5px); display: grid; place-items: center; cursor: pointer; opacity: 0; transition: opacity .15s; }
 .item-card:hover .card-more { opacity: 1; }
 .image-count { position: absolute; right: 8px; bottom: 8px; background: rgba(var(--ink-rgb),.78); color: var(--on-dark); padding: 3px 6px; border-radius: 10px; font-size: 7px; }

@@ -21,7 +21,7 @@ import { useWardrobe } from "@/components/wardrobe-provider";
 import { CATEGORIES } from "@/lib/constants";
 import type { Category, OwnershipStatus } from "@/lib/types";
 
-type StatusFilter = "all" | OwnershipStatus;
+type StatusFilter = "all" | OwnershipStatus | "archived";
 type Sort = "newest" | "name" | "rating";
 
 export default function ClosetPage() {
@@ -45,7 +45,12 @@ export default function ClosetPage() {
 
   const filtered = useMemo(() => {
     const result = items.filter((item) => {
-      if (status !== "all" && item.ownershipStatus !== status) return false;
+      if (status === "archived") {
+        if (!item.isArchived) return false;
+      } else {
+        if (item.isArchived) return false;
+        if (status !== "all" && item.ownershipStatus !== status) return false;
+      }
       if (category !== "all" && item.category !== category) return false;
       if (attentionOnly && !item.needsAttention) return false;
       if (ratingOnly && item.satisfactionRating !== 5) return false;
@@ -59,6 +64,8 @@ export default function ClosetPage() {
     });
   }, [attentionOnly, category, items, query, ratingOnly, sort, status]);
 
+  const activeItems = items.filter((item) => !item.isArchived);
+  const archivedItems = items.filter((item) => item.isArchived);
   const filterCount = Number(category !== "all") + Number(attentionOnly) + Number(ratingOnly);
   const clearFilters = () => {
     setStatus("all"); setCategory("all"); setAttentionOnly(false); setRatingOnly(false); setQuery("");
@@ -69,15 +76,16 @@ export default function ClosetPage() {
       <PageHeader
         eyebrow="Your wardrobe"
         title="My closet"
-        description={`${items.filter((item) => item.ownershipStatus === "own").length} pieces you own · ${items.filter((item) => item.ownershipStatus === "want").length} saved for later`}
+        description={`${activeItems.filter((item) => item.ownershipStatus === "own").length} pieces you own · ${activeItems.filter((item) => item.ownershipStatus === "want").length} saved for later`}
         action={<Link className="button button-primary button-md" href="/closet/new"><Plus size={17} /> Add an item</Link>}
       />
 
       <div className="closet-tabs" role="tablist">
         {([
-          ["all", "Everything", items.length],
-          ["own", "I own", items.filter((item) => item.ownershipStatus === "own").length],
-          ["want", "Wishlist", items.filter((item) => item.ownershipStatus === "want").length],
+          ["all", "Everything", activeItems.length],
+          ["own", "I own", activeItems.filter((item) => item.ownershipStatus === "own").length],
+          ["want", "Wishlist", activeItems.filter((item) => item.ownershipStatus === "want").length],
+          ["archived", "Archived", archivedItems.length],
         ] as const).map(([value, label, count]) => (
           <button key={value} className={status === value ? "active" : ""} onClick={() => setStatus(value)}>{label}<span>{count}</span></button>
         ))}
@@ -123,17 +131,17 @@ export default function ClosetPage() {
         </div>
       ) : (
         <EmptyState
-          icon={items.length ? Search : Shirt}
-          title={items.length ? "No pieces match those filters" : "Your closet is ready for its first piece"}
-          copy={items.length ? "Try widening your search or clearing the active filters." : "Add what you reach for most. You can fill in the rest over time."}
-          action={items.length ? <button className="button button-secondary button-md" onClick={clearFilters}>Clear filters</button> : <Link className="button button-primary button-md" href="/closet/new"><Plus size={16} /> Add your first item</Link>}
+          icon={activeItems.length ? Search : Shirt}
+          title={!activeItems.length ? "Your closet is ready for its first piece" : status === "archived" ? "Nothing archived yet" : "No pieces match those filters"}
+          copy={!activeItems.length ? "Add what you reach for most. You can fill in the rest over time." : status === "archived" ? "Archived pieces rest here, out of your daily views but never deleted." : "Try widening your search or clearing the active filters."}
+          action={!activeItems.length ? <Link className="button button-primary button-md" href="/closet/new"><Plus size={16} /> Add your first item</Link> : status === "archived" ? undefined : <button className="button button-secondary button-md" onClick={clearFilters}>Clear filters</button>}
         />
       )}
 
-      {items.some((item) => item.needsAttention) && !attentionOnly ? (
+      {activeItems.some((item) => item.needsAttention) && !attentionOnly ? (
         <Link href="/closet?attention=true" onClick={() => setAttentionOnly(true)} className="closet-care-strip">
           <span><AlertCircle size={18} /></span>
-          <div><strong>Care keeps favorites in rotation</strong><p>{items.filter((item) => item.needsAttention).length} pieces are waiting for a little attention.</p></div>
+          <div><strong>Care keeps favorites in rotation</strong><p>{activeItems.filter((item) => item.needsAttention).length} pieces are waiting for a little attention.</p></div>
           <span>Review them →</span>
         </Link>
       ) : null}

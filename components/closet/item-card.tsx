@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, Heart, MoreHorizontal } from "lucide-react";
+import { AlertCircle, Archive, Heart, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { COLOR_HEX } from "@/lib/constants";
 import type { Item } from "@/lib/types";
@@ -19,6 +19,7 @@ export function ItemCard({ item, selectable, selected, onSelect }: {
         <div className="item-card-badges">
           {item.ownershipStatus === "want" ? <span className="badge badge-want"><Heart size={12} /> Wishlist</span> : null}
           {item.needsAttention ? <span className="badge badge-attention"><AlertCircle size={12} /> Attention</span> : null}
+          {item.isArchived ? <span className="badge badge-archived"><Archive size={12} /> Archived</span> : null}
         </div>
         {selectable ? (
           <span className={`selection-check${selected ? " selected" : ""}`}>{selected ? "✓" : ""}</span>

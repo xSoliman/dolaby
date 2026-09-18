@@ -42,12 +42,13 @@ export default function OutfitBuilderPage() {
     if (requestedEdit) {
       const outfit = outfits.find((entry) => entry.id === requestedEdit);
       if (outfit) { setEditId(outfit.id); setName(outfit.name); setOccasion(outfit.occasion); setSelected(outfit.itemIds); }
-    } else if (requestedItem && items.some((item) => item.id === requestedItem)) {
+    } else if (requestedItem && items.some((item) => item.id === requestedItem && !item.isArchived)) {
       setSelected([requestedItem]);
     }
   }, [items, outfits]);
 
   const visible = useMemo(() => items.filter((item) => {
+    if (item.isArchived) return false;
     if (status !== "all" && item.ownershipStatus !== status) return false;
     if (category !== "all" && item.category !== category) return false;
     return !query || `${item.name} ${item.type} ${item.primaryColor}`.toLowerCase().includes(query.toLowerCase());

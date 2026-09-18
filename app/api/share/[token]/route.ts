@@ -86,16 +86,19 @@ export async function GET(
       .from("items")
       .select("*, item_photos(storage_path, sort_order)")
       .eq("user_id", shareRow.user_id)
+      .eq("is_archived", false)
       .order("created_at", { ascending: false }),
     supabase
       .from("outfits")
       .select("*, outfit_items(item_id)")
       .eq("user_id", shareRow.user_id)
+      .eq("is_archived", false)
       .order("created_at", { ascending: false }),
     supabase
       .from("stores")
       .select("*")
       .eq("user_id", shareRow.user_id)
+      .eq("is_archived", false)
       .order("name"),
   ]);
 
@@ -148,6 +151,7 @@ export async function GET(
       candidateStoreIds: [],
       note: row.note ?? "",
       photos: photos.map((photo) => urlMap.get(photo.storage_path) ?? ""),
+      isArchived: false,
       createdAt: row.created_at,
     };
   });
@@ -158,6 +162,7 @@ export async function GET(
     occasion: row.occasion,
     isDraft: row.is_draft,
     itemIds: (row.outfit_items ?? []).map((link) => link.item_id),
+    isArchived: false,
     createdAt: row.created_at,
   }));
 
@@ -170,6 +175,7 @@ export async function GET(
     photo: row.photo_path ? urlMap.get(row.photo_path) ?? "" : "",
     photoPath: row.photo_path ?? undefined,
     note: row.note ?? "",
+    isArchived: false,
     createdAt: row.created_at,
   }));
 

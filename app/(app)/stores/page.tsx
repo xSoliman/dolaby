@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Archive,
   ExternalLink,
   Globe2,
   MapPin,
@@ -20,22 +21,35 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Modal } from "@/components/ui/modal";
 import { useToast } from "@/components/ui/toast";
 import { useWardrobe } from "@/components/wardrobe-provider";
+import { errorMessage } from "@/lib/format";
 import type { Store } from "@/lib/types";
 
 export default function StoresPage() {
-  const { stores, items, deleteStore } = useWardrobe();
+  const { stores, items, deleteStore, setStoreArchived } = useWardrobe();
   const { notify } = useToast();
   const [query, setQuery] = useState("");
+  const [showArchived, setShowArchived] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Store | undefined>();
   const [viewing, setViewing] = useState<Store | undefined>();
   const [menu, setMenu] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Store | undefined>();
 
-  const filtered = useMemo(() => stores.filter((store) => `${store.name} ${store.location} ${store.note}`.toLowerCase().includes(query.toLowerCase())), [query, stores]);
+  const filtered = useMemo(() => stores.filter((store) => showArchived ? store.isArchived : !store.isArchived).filter((store) => `${store.name} ${store.location} ${store.note}`.toLowerCase().includes(query.toLowerCase())), [query, showArchived, stores]);
+  const activeStores = stores.filter((store) => !store.isArchived);
+  const archivedStores = stores.filter((store) => store.isArchived);
   const itemCount = (store: Store) => items.filter((item) => item.sourceStoreId === store.id || item.candidateStoreIds.includes(store.id)).length;
 
   const closeForm = () => { setFormOpen(false); setEditing(undefined); };
+  const toggleArchive = async (store: Store) => {
+    try {
+      await setStoreArchived(store.id, !store.isArchived);
+      setViewing(undefined);
+      notify(store.isArchived ? "Store restored." : "Store archived.");
+    } catch (error) {
+      notify(errorMessage(error, "Could not update this store."), "error");
+    }
+  };
   const remove = async () => {
     if (!deleteTarget) return;
     try {
@@ -53,12 +67,14 @@ export default function StoresPage() {
       <PageHeader eyebrow="Your sources" title="Stores & brands" description="Remember where the good finds come from — and where to look next." action={<Button onClick={() => setFormOpen(true)}><Plus size={17} /> Add a store</Button>} />
 
       <div className="stores-summary">
-        <div><span className="stat-icon sage"><StoreIcon size={19} /></span><span><strong>{stores.length}</strong><small>Saved places</small></span></div>
-        <div><span className="stat-icon lilac"><Globe2 size={19} /></span><span><strong>{stores.filter((store) => store.type !== "physical").length}</strong><small>Shop online</small></span></div>
-        <div><span className="stat-icon peach"><MapPin size={19} /></span><span><strong>{stores.filter((store) => store.type !== "online").length}</strong><small>Visit in person</small></span></div>
+        <div><span className="stat-icon sage"><StoreIcon size={19} /></span><span><strong>{activeStores.length}</strong><small>Saved places</small></span></div>
+        <div><span className="stat-icon lilac"><Globe2 size={19} /></span><span><strong>{activeStores.filter((store) => store.type !== "physical").length}</strong><small>Shop online</small></span></div>
+        <div><span className="stat-icon peach"><MapPin size={19} /></span><span><strong>{activeStores.filter((store) => store.type !== "online").length}</strong><small>Visit in person</small></span></div>
       </div>
 
       <label className="stores-search"><Search size={18} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search stores, locations, or notes…" /></label>
+
+      {archivedStores.length ? <div className="collection-meta"><p><strong>{archivedStores.length}</strong> archived</p><div><button className="text-link" onClick={() => setShowArchived((value) => !value)}>{showArchived ? "← Back to active stores" : "Show archived"}</button></div></div> : null}
 
       {filtered.length ? (
         <div className="stores-grid">
@@ -87,7 +103,7 @@ export default function StoresPage() {
           <button className="add-store-card" onClick={() => setFormOpen(true)}><span><Plus size={21} /></span><strong>Add another place</strong><small>Brand, boutique, or favorite shop</small></button>
         </div>
       ) : (
-        <EmptyState icon={stores.length ? Search : StoreIcon} title={stores.length ? "No stores match that search" : "Save your first good source"} copy={stores.length ? "Try a name, location, or something from your notes." : "Keep useful stores, brands, sizing notes, and links in one place."} action={!stores.length ? <Button onClick={() => setFormOpen(true)}><Plus size={16} /> Add a store</Button> : undefined} />
+        <EmptyState icon={showArchived || activeStores.length ? Search : StoreIcon} title={showArchived ? "No archived stores match that search" : activeStores.length ? "No stores match that search" : "Save your first good source"} copy={showArchived || activeStores.length ? "Try a name, location, or something from your notes." : "Keep useful stores, brands, sizing notes, and links in one place."} action={!showArchived && !activeStores.length ? <Button onClick={() => setFormOpen(true)}><Plus size={16} /> Add a store</Button> : undefined} />
       )}
 
       <Modal open={formOpen} onClose={closeForm} title={editing ? `Edit ${editing.name}` : "Add a store or brand"} eyebrow={editing ? "Store details" : "A useful source"}>
@@ -98,8 +114,8 @@ export default function StoresPage() {
         {viewing ? <div className="store-detail-modal">
           <div className="store-detail-photo">{viewing.photo ? <img src={viewing.photo} alt={viewing.name} /> : <StoreIcon size={32} />}</div>
           {viewing.note ? <p className="store-quote">“{viewing.note}”</p> : null}
-          <dl><div><dt><MapPin size={15} /> Location</dt><dd>{viewing.location || "Not added"}</dd></div><div><dt><Globe2 size={15} /> Website</dt><dd>{viewing.url ? <a href={viewing.url} target="_blank" rel="noreferrer">Visit website <ExternalLink size={13} /></a> : "Not added"}</dd></div><div><dt><Shirt size={15} /> Wardrobe</dt><dd>{itemCount(viewing)} connected pieces</dd></div></dl>
-          <div className="modal-form-actions"><Button variant="secondary" onClick={() => { setEditing(viewing); setFormOpen(true); setViewing(undefined); }}><Pencil size={15} /> Edit</Button>{viewing.url ? <a className="button button-primary button-md" href={viewing.url} target="_blank" rel="noreferrer">Open store <ExternalLink size={14} /></a> : null}</div>
+          <dl><div><dt><MapPin size={15} /> Location</dt><dd>{viewing.location || "Not added"}</dd></div><div><dt><Globe2 size={15} /> Website</dt><dd>{viewing.url ? <a href={viewing.url} target="_blank" rel="noreferrer">Visit website <ExternalLink size={13} /></a> : "Not added"}</dd></div>          <div><dt><Shirt size={15} /> Wardrobe</dt><dd>{itemCount(viewing)} connected pieces</dd></div></dl>
+          <div className="modal-form-actions"><Button variant="secondary" onClick={() => { setEditing(viewing); setFormOpen(true); setViewing(undefined); }}><Pencil size={15} /> Edit</Button><Button variant="secondary" onClick={() => void toggleArchive(viewing)}><Archive size={15} /> {viewing.isArchived ? "Unarchive" : "Archive"}</Button>{viewing.url ? <a className="button button-primary button-md" href={viewing.url} target="_blank" rel="noreferrer">Open store <ExternalLink size={14} /></a> : null}</div>
         </div> : null}
       </Modal>
 

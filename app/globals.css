@@ -889,6 +889,16 @@ kbd { font: inherit; font-size: 9px; border: 1px solid rgba(var(--paper-rgb),.24
 .share-page .store-card-footer a { display: inline-flex; align-items: center; gap: 5px; font-size: 8px; font-weight: 600; color: var(--forest-2); }
 .share-page .item-grid { gap: 26px 20px; }
 .share-page .item-grid .item-card { cursor: pointer; }
+.share-page .item-grid .item-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 10px 10px 14px;
+  box-shadow: var(--shadow-sm);
+}
+.share-page .item-grid .item-card:hover { box-shadow: var(--shadow-md); }
+.share-page .item-grid .item-card-photo { box-shadow: none; }
+.share-page .item-grid .item-card-info { padding-left: 6px; padding-right: 6px; }
 .share-items-toolbar { align-items: end; }
 .share-ownership { margin: 0; }
 .share-detail-modal { display: grid; gap: 18px; }

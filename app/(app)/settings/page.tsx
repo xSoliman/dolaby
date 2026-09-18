@@ -6,6 +6,7 @@ import {
   Check,
   Database,
   Download,
+  Link2,
   LockKeyhole,
   LogOut,
   RotateCcw,
@@ -15,6 +16,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { PageHeader } from "@/components/page-header";
+import { ShareControls } from "@/components/share/share-controls";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { useToast } from "@/components/ui/toast";
@@ -42,7 +44,7 @@ export default function SettingsPage() {
       <PageHeader eyebrow="Your space" title="Settings" description="Account, privacy, and a few useful wardrobe controls." />
 
       <div className="settings-layout">
-        <nav className="settings-nav"><a href="#account" className="active"><UserRound size={17} /> Account</a><a href="#privacy"><ShieldCheck size={17} /> Privacy</a><a href="#data"><Database size={17} /> Your data</a></nav>
+        <nav className="settings-nav"><a href="#account" className="active"><UserRound size={17} /> Account</a><a href="#privacy"><ShieldCheck size={17} /> Privacy</a><a href="#sharing"><Link2 size={17} /> Sharing</a><a href="#data"><Database size={17} /> Your data</a></nav>
 
         <div className="settings-sections">
           <section className="settings-card" id="account">
@@ -53,8 +55,13 @@ export default function SettingsPage() {
           </section>
 
           <section className="settings-card" id="privacy">
-            <div className="settings-card-heading"><div><p className="eyebrow">Privacy</p><h2>Private by default</h2><p>Your closet is yours. Sharing is not part of v1.</p></div><span className="privacy-seal"><LockKeyhole size={21} /></span></div>
-            <div className="privacy-list"><div><span><Check size={14} /></span><p><strong>Your rows are isolated</strong><small>Database policies restrict every wardrobe record to its owner.</small></p></div><div><span><Check size={14} /></span><p><strong>Your images use private storage</strong><small>Photos are accessed through short-lived signed links.</small></p></div><div><span><Check size={14} /></span><p><strong>No wardrobe is publicly searchable</strong><small>There are no public profiles, follows, or closet sharing.</small></p></div></div>
+            <div className="settings-card-heading"><div><p className="eyebrow">Privacy</p><h2>Private by default</h2><p>Your closet is private until you choose to share it.</p></div><span className="privacy-seal"><LockKeyhole size={21} /></span></div>
+            <div className="privacy-list"><div><span><Check size={14} /></span><p><strong>Your rows are isolated</strong><small>Database policies restrict every wardrobe record to its owner.</small></p></div><div><span><Check size={14} /></span><p><strong>Your images use private storage</strong><small>Photos are accessed through short-lived signed links.</small></p></div><div><span><Check size={14} /></span><p><strong>Shared links are read-only and revocable</strong><small>Viewers can&apos;t change anything, and you can turn the link off any time.</small></p></div></div>
+          </section>
+
+          <section className="settings-card" id="sharing">
+            <div className="settings-card-heading"><div><p className="eyebrow">Sharing</p><h2>Share your closet</h2><p>A read-only link for someone you trust. Your wear diary stays private.</p></div><span className="privacy-seal"><Link2 size={21} /></span></div>
+            <div className="share-controls-wrap"><ShareControls /></div>
           </section>
 
           <section className="settings-card" id="data">

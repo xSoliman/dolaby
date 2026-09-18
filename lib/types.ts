@@ -80,3 +80,9 @@ export interface Profile {
   name: string;
   email: string;
 }
+
+export interface WardrobeShare {
+  token: string;
+  isEnabled: boolean;
+  createdAt: string;
+}

@@ -11,6 +11,7 @@ import {
   useState,
 } from "react";
 import { seedData } from "@/lib/seed-data";
+import { newShareToken } from "@/lib/sharing";
 import { getSupabaseBrowserClient, hasSupabaseConfig } from "@/lib/supabase/client";
 import type {
   Item,
@@ -21,12 +22,14 @@ import type {
   Store,
   StoreDraft,
   WardrobeData,
+  WardrobeShare,
   WearEntry,
   WearEntryDraft,
 } from "@/lib/types";
 
 const STORAGE_KEY = "dolaby.wardrobe.v1";
 const DEMO_KEY = "dolaby.demo";
+const SHARE_KEY = "dolaby.share.v1";
 
 interface WardrobeContextValue extends WardrobeData {
   loading: boolean;
@@ -50,6 +53,11 @@ interface WardrobeContextValue extends WardrobeData {
   deleteOutfit: (id: string) => Promise<void>;
   addWearEntry: (draft: WearEntryDraft) => Promise<WearEntry>;
   deleteWearEntry: (id: string) => Promise<void>;
+  share: WardrobeShare | null;
+  shareLoading: boolean;
+  createShare: () => Promise<WardrobeShare>;
+  setShareEnabled: (enabled: boolean) => Promise<void>;
+  regenerateShare: () => Promise<WardrobeShare>;
 }
 
 interface DbPhoto {
@@ -169,6 +177,8 @@ export function WardrobeProvider({ children }: { children: React.ReactNode }) {
     hasSupabaseConfig ? null : { id: "demo-user", name: "Nour Hassan", email: "demo@dolaby.app" },
   );
   const [isDemo, setIsDemo] = useState(!hasSupabaseConfig);
+  const [share, setShare] = useState<WardrobeShare | null>(null);
+  const [shareLoading, setShareLoading] = useState(false);
   const hydrated = useRef(false);
 
   const signedUrls = useCallback(async (paths: string[]) => {
@@ -279,6 +289,20 @@ export function WardrobeProvider({ children }: { children: React.ReactNode }) {
       });
       setProfile(profileFromUser(user));
       setIsDemo(false);
+      try {
+        const { data: shareRow } = await supabase
+          .from("wardrobe_shares")
+          .select("token, is_enabled, created_at")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        const row = shareRow as { token: string; is_enabled: boolean; created_at: string } | null;
+        setShare(
+          row ? { token: row.token, isEnabled: row.is_enabled, createdAt: row.created_at } : null,
+        );
+      } catch {
+        // Sharing table may not exist yet on older databases; stay unshared.
+        setShare(null);
+      }
       setLoading(false);
     },
     [signedUrls],
@@ -296,6 +320,12 @@ export function WardrobeProvider({ children }: { children: React.ReactNode }) {
         } catch {
           window.localStorage.removeItem(STORAGE_KEY);
         }
+      }
+      try {
+        const savedShare = window.localStorage.getItem(SHARE_KEY);
+        setShare(savedShare ? (JSON.parse(savedShare) as WardrobeShare) : null);
+      } catch {
+        setShare(null);
       }
       setProfile({ id: "demo-user", name: "Nour Hassan", email: "demo@dolaby.app" });
       setIsDemo(true);
@@ -320,6 +350,7 @@ export function WardrobeProvider({ children }: { children: React.ReactNode }) {
         void loadRemote(session.user).catch(() => setLoading(false));
       } else {
         setProfile(null);
+        setShare(null);
         setData({ items: [], stores: [], outfits: [], wearEntries: [] });
       }
     });
@@ -365,6 +396,7 @@ export function WardrobeProvider({ children }: { children: React.ReactNode }) {
       if (hasSupabaseConfig) {
         setIsDemo(false);
         setProfile(null);
+        setShare(null);
         setData({ items: [], stores: [], outfits: [], wearEntries: [] });
       }
       return;
@@ -376,6 +408,12 @@ export function WardrobeProvider({ children }: { children: React.ReactNode }) {
     window.localStorage.setItem(DEMO_KEY, "true");
     const saved = window.localStorage.getItem(STORAGE_KEY);
     setData(saved ? (JSON.parse(saved) as WardrobeData) : seedData);
+    try {
+      const savedShare = window.localStorage.getItem(SHARE_KEY);
+      setShare(savedShare ? (JSON.parse(savedShare) as WardrobeShare) : null);
+    } catch {
+      setShare(null);
+    }
     setProfile({ id: "demo-user", name: "Nour Hassan", email: "demo@dolaby.app" });
     setIsDemo(true);
   };
@@ -741,6 +779,65 @@ export function WardrobeProvider({ children }: { children: React.ReactNode }) {
     }));
   };
 
+  const saveShareToken = async (token: string) => {
+    const remote = requireRemote();
+    if (remote) {
+      setShareLoading(true);
+      try {
+        const { data, error } = await remote.supabase
+          .from("wardrobe_shares")
+          .upsert({ user_id: remote.userId, token, is_enabled: true }, { onConflict: "user_id" })
+          .select("token, is_enabled, created_at")
+          .single();
+        if (error) throw error;
+        const row = data as { token: string; is_enabled: boolean; created_at: string };
+        const next: WardrobeShare = {
+          token: row.token,
+          isEnabled: row.is_enabled,
+          createdAt: row.created_at,
+        };
+        setShare(next);
+        return next;
+      } finally {
+        setShareLoading(false);
+      }
+    }
+    const next: WardrobeShare = { token, isEnabled: true, createdAt: new Date().toISOString() };
+    window.localStorage.setItem(SHARE_KEY, JSON.stringify(next));
+    setShare(next);
+    return next;
+  };
+
+  const createShare = () => saveShareToken(newShareToken());
+
+  const regenerateShare = () => saveShareToken(newShareToken());
+
+  const setShareEnabled = async (enabled: boolean) => {
+    if (!share) {
+      if (!enabled) return;
+      await createShare();
+      return;
+    }
+    const remote = requireRemote();
+    if (remote) {
+      setShareLoading(true);
+      try {
+        const { error } = await remote.supabase
+          .from("wardrobe_shares")
+          .update({ is_enabled: enabled })
+          .eq("user_id", remote.userId);
+        if (error) throw error;
+        setShare({ ...share, isEnabled: enabled });
+      } finally {
+        setShareLoading(false);
+      }
+      return;
+    }
+    const next = { ...share, isEnabled: enabled };
+    window.localStorage.setItem(SHARE_KEY, JSON.stringify(next));
+    setShare(next);
+  };
+
   const value = useMemo<WardrobeContextValue>(
     () => ({
       ...data,
@@ -765,10 +862,15 @@ export function WardrobeProvider({ children }: { children: React.ReactNode }) {
       deleteOutfit,
       addWearEntry,
       deleteWearEntry,
+      share,
+      shareLoading,
+      createShare,
+      setShareEnabled,
+      regenerateShare,
     }),
     // CRUD functions intentionally close over the latest data and auth state.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data, loading, authReady, profile, isDemo],
+    [data, loading, authReady, profile, isDemo, share, shareLoading],
   );
 
   return <WardrobeContext.Provider value={value}>{children}</WardrobeContext.Provider>;

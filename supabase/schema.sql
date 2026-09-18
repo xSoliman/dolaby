@@ -123,6 +123,17 @@ create table public.wear_entry_items (
   foreign key (item_id, user_id) references public.items(id, user_id) on delete cascade
 );
 
+-- One optional read-only share link per wardrobe. The token is unguessable;
+-- viewing happens through a server API that checks it, so this table stays
+-- owner-only under row-level security with no anonymous policies.
+create table public.wardrobe_shares (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null unique references auth.users(id) on delete cascade,
+  token text not null unique,
+  is_enabled boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
 create index items_user_category_idx on public.items(user_id, category);
 create index items_user_ownership_idx on public.items(user_id, ownership_status);
 create index items_user_attention_idx on public.items(user_id, needs_attention) where needs_attention;
@@ -164,6 +175,7 @@ alter table public.outfits enable row level security;
 alter table public.outfit_items enable row level security;
 alter table public.wear_entries enable row level security;
 alter table public.wear_entry_items enable row level security;
+alter table public.wardrobe_shares enable row level security;
 
 create policy "profiles_select_own" on public.profiles for select using (auth.uid() = id);
 create policy "profiles_update_own" on public.profiles for update using (auth.uid() = id) with check (auth.uid() = id);
@@ -176,6 +188,7 @@ create policy "outfits_owner_all" on public.outfits for all using (auth.uid() = 
 create policy "outfit_items_owner_all" on public.outfit_items for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "wear_entries_owner_all" on public.wear_entries for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "wear_entry_items_owner_all" on public.wear_entry_items for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "wardrobe_shares_owner_all" on public.wardrobe_shares for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 -- Private media bucket. Paths are always `{user_id}/items/...` or
 -- `{user_id}/stores/...`; the app creates short-lived signed URLs for display.

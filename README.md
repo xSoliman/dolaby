@@ -13,6 +13,7 @@ The implementation follows `dolaby-requirements-v1.md`: Next.js handles the prod
 - Store and brand CRUD with a single private image
 - Manual outfit builder with drafts and ready looks
 - Wear diary with saved-outfit or ad-hoc item logging and quick feeling feedback
+- Read-only wardrobe sharing through a revocable link (`/s/[token]`)
 - Responsive desktop/mobile layouts
 - Browser-persistent demo mode for trying every flow without infrastructure
 
@@ -36,7 +37,12 @@ Open `http://localhost:3000`. Without environment variables, Dolaby starts in de
    ```env
    NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+   SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
    ```
+
+   The service-role key stays on the server and powers the read-only share-link
+   API (`/api/share/[token]`). Without it, share links return a
+   “not configured” message; everything else keeps working.
 
 4. In Supabase Authentication → URL Configuration, set the Site URL to your local or production URL and add `/auth/callback` as an allowed redirect path.
 5. Restart the dev server. The sign-in and create-account forms will now use Supabase; the demo remains available as a separate option.
@@ -44,6 +50,14 @@ Open `http://localhost:3000`. Without environment variables, Dolaby starts in de
 For an existing database, do not rerun the full schema. Apply new SQL files from [`supabase/migrations`](./supabase/migrations) in timestamp order.
 
 Item uploads are resized in the browser to a maximum 1600px edge and encoded as JPEG before entering the private bucket. Database records store only storage paths; the UI creates one-hour signed URLs for display.
+
+## Sharing
+
+Settings → Sharing creates one read-only link per wardrobe (`/s/[token]`). Viewers
+see pieces and ready outfits with photos; the wear diary, stores, and shopping
+details stay private. The owner can turn the link off or generate a new one at
+any time, which immediately invalidates the old link. In demo mode the link
+previews the demo wardrobe on the same device only.
 
 ## Quality checks
 
@@ -55,7 +69,7 @@ npm run build
 
 ## Deploy
 
-Import the repository into Vercel, add the two public Supabase environment variables, and deploy. Add the resulting Vercel domain to Supabase's allowed redirect URLs.
+Import the repository into Vercel, add the two public Supabase environment variables plus `SUPABASE_SERVICE_ROLE_KEY`, and deploy. Add the resulting Vercel domain to Supabase's allowed redirect URLs.
 
 ## Data model notes
 
@@ -63,4 +77,5 @@ Import the repository into Vercel, add the two public Supabase environment varia
 - Item photos are separate rows so they can be ordered and extended later without changing the item record.
 - Outfit/item and wear-entry/item relations use join tables.
 - Every entity and join row includes `user_id`; row-level policies compare it with `auth.uid()`.
-- Shared closets, structured tags, suggestions, gap analysis, care workflows, and shopping workflows remain intentionally outside v1.
+- One wardrobe has at most one share row in `wardrobe_shares`; viewing happens through the service-role share API, never through anonymous table access.
+- Structured tags, suggestions, gap analysis, care workflows, and shopping workflows remain intentionally outside v1.

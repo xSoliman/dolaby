@@ -11,7 +11,7 @@ export const CATEGORIES: { value: Category; label: string }[] = [
 
 export const ITEM_TYPES: Record<Category, string[]> = {
   top: ["T-shirt", "Shirt", "Polo", "Sweater", "Hoodie", "Tank top"],
-  bottom: ["Jeans", "Trousers", "Chinos", "Shorts", "Skirt"],
+  bottom: ["Jeans", "Trousers", "Chinos", "Shorts", "Skirt", "Sweatpants"],
   underwear: [
     "Briefs",
     "Boxer briefs",

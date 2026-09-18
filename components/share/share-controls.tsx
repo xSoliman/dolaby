@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { useToast } from "@/components/ui/toast";
 import { useWardrobe } from "@/components/wardrobe-provider";
+import { errorMessage } from "@/lib/format";
 import { shareUrl } from "@/lib/sharing";
 
 export function ShareControls() {
@@ -22,7 +23,8 @@ export function ShareControls() {
       await action();
       notify(success);
     } catch (error) {
-      notify(error instanceof Error ? error.message : "Could not update sharing.", "error");
+      console.error("Sharing update failed:", error);
+      notify(errorMessage(error, "Could not update sharing."), "error");
     } finally {
       setBusy(false);
     }

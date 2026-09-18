@@ -31,3 +31,22 @@ export function initials(name: string) {
     .join("")
     .toUpperCase();
 }
+
+/**
+ * Supabase failures arrive as plain `{ message, ... }` objects rather than
+ * Error instances, so `error instanceof Error` alone hides the real reason.
+ */
+export function errorMessage(error: unknown, fallback: string) {
+  if (error instanceof Error && error.message) return error.message;
+  if (typeof error === "string" && error) return error;
+  if (
+    error !== null &&
+    typeof error === "object" &&
+    "message" in error &&
+    typeof (error as { message: unknown }).message === "string" &&
+    (error as { message: string }).message
+  ) {
+    return (error as { message: string }).message;
+  }
+  return fallback;
+}

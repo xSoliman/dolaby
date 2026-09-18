@@ -887,9 +887,10 @@ kbd { font: inherit; font-size: 9px; border: 1px solid rgba(var(--paper-rgb),.24
 .share-note { display: flex; align-items: center; gap: 9px; border: 1px solid var(--line); background: var(--paper); border-radius: 11px; padding: 11px 14px; color: var(--muted); font-size: 10px; }
 .share-note svg { flex: 0 0 auto; }
 .share-page .store-card-footer a { display: inline-flex; align-items: center; gap: 5px; font-size: 8px; font-weight: 600; color: var(--forest-2); }
-.share-card-button { cursor: pointer; font: inherit; text-align: left; padding: 0; border: 0; background: none; }
 .share-page .item-grid { gap: 26px 20px; }
-.share-card-text { flex: 1; min-width: 0; }
+.share-page .item-grid .item-card { cursor: pointer; }
+.share-items-toolbar { align-items: end; }
+.share-ownership { margin: 0; }
 .share-detail-modal { display: grid; gap: 18px; }
 .share-detail-photo { aspect-ratio: .9; border-radius: 13px; overflow: hidden; background: var(--stone); display: grid; place-items: center; color: var(--text-faint); }
 .share-detail-photo img { width: 100%; height: 100%; object-fit: cover; }

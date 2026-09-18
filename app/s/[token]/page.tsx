@@ -1,12 +1,10 @@
 "use client";
 
 import {
-  AlertCircle,
   CheckCircle2,
   ExternalLink,
   Eye,
   Globe2,
-  Heart,
   Link2,
   LockKeyhole,
   MapPin,
@@ -22,12 +20,12 @@ import {
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { ItemImage } from "@/components/item-image";
+import { ItemCard } from "@/components/closet/item-card";
 import { Logo } from "@/components/logo";
 import { OutfitPreview } from "@/components/outfits/outfit-preview";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Modal } from "@/components/ui/modal";
-import { CATEGORIES, COLOR_HEX, formatCategory, formatOccasion } from "@/lib/constants";
+import { CATEGORIES, formatCategory, formatOccasion } from "@/lib/constants";
 import { demoShareFromStorage, toSharedPayload } from "@/lib/sharing";
 import type { Category, Item, Outfit, OwnershipStatus, Store, WardrobeData } from "@/lib/types";
 import type { SharedWardrobe } from "@/lib/sharing";
@@ -255,40 +253,45 @@ export default function SharedWardrobePage() {
 
         {section === "items" ? (
           <>
-            <div className="closet-tabs" role="tablist">
-          {(
-            [
-              ["all", "Everything", items.length],
-              ["own", "Owns", owned],
-              ["want", "Wishlist", wanted],
-            ] as const
-          ).map(([value, label, count]) => (
-            <button
-              key={value}
-              className={tab === value ? "active" : ""}
-              onClick={() => setTab(value)}
-            >
-              {label}
-              <span>{count}</span>
-            </button>
-          ))}
-        </div>
+            <section className="closet-toolbar share-items-toolbar">
+              <label className="closet-search">
+                <Search size={18} />
+                <input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search pieces…"
+                />
+                {query ? (
+                  <button onClick={() => setQuery("")} aria-label="Clear search">
+                    <X size={15} />
+                  </button>
+                ) : null}
+              </label>
+              <fieldset className="field share-ownership">
+                <legend>Show</legend>
+                <div className="segmented-control" role="tablist" aria-label="Ownership filter">
+                  {(
+                    [
+                      ["all", "Everything", items.length],
+                      ["own", "Owns", owned],
+                      ["want", "Wishlist", wanted],
+                    ] as const
+                  ).map(([value, label, count]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      role="tab"
+                      aria-selected={tab === value}
+                      className={tab === value ? "active" : ""}
+                      onClick={() => setTab(value)}
+                    >
+                      {label} · {count}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+            </section>
 
-        <section className="closet-toolbar">
-          <label className="closet-search">
-            <Search size={18} />
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search pieces…"
-            />
-            {query ? (
-              <button onClick={() => setQuery("")} aria-label="Clear search">
-                <X size={15} />
-              </button>
-            ) : null}
-          </label>
-          <div className="filter-row">
             <div className="category-filters">
               <button className={category === "all" ? "active" : ""} onClick={() => setCategory("all")}>
                 All types
@@ -303,8 +306,6 @@ export default function SharedWardrobePage() {
                 </button>
               ))}
             </div>
-          </div>
-        </section>
 
         <div className="collection-meta">
           <p>
@@ -315,41 +316,7 @@ export default function SharedWardrobePage() {
         {filtered.length ? (
           <div className="item-grid">
             {filtered.map((item) => (
-              <button
-                type="button"
-                className="item-card share-card-button"
-                key={item.id}
-                onClick={() => openItem(item)}
-              >
-                <span className="item-card-photo">
-                  <ItemImage src={item.photos[0]} alt={item.name || item.type} count={item.photos.length} />
-                  <span className="item-card-badges">
-                    {item.ownershipStatus === "want" ? (
-                      <span className="badge badge-want">
-                        <Heart size={12} /> Wishlist
-                      </span>
-                    ) : null}
-                    {item.needsAttention ? (
-                      <span className="badge badge-attention">
-                        <AlertCircle size={12} /> Attention
-                      </span>
-                    ) : null}
-                  </span>
-                </span>
-                <span className="item-card-info">
-                  <span className="share-card-text">
-                    <h3>{item.name || item.type}</h3>
-                    <p>
-                      {item.type} · {item.material || "Material not set"}
-                    </p>
-                  </span>
-                  <span
-                    className="color-swatch"
-                    style={{ backgroundColor: COLOR_HEX[item.primaryColor] ?? item.primaryColor }}
-                    title={item.primaryColor}
-                  />
-                </span>
-              </button>
+              <ItemCard key={item.id} item={item} selectable onSelect={() => openItem(item)} />
             ))}
           </div>
         ) : (

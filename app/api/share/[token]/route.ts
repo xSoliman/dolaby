@@ -54,12 +54,17 @@ export async function GET(
     return Response.json({ error: "Sharing is not configured on the server." }, { status: 503 });
   }
 
-  const { data: share } = await supabase
+  const { data: share, error: shareError } = await supabase
     .from("wardrobe_shares")
     .select("user_id")
     .eq("token", token)
     .eq("is_enabled", true)
     .maybeSingle();
+
+  if (shareError) {
+    console.error("Share lookup failed:", shareError);
+    return notActive();
+  }
 
   const shareRow = share as ShareRow | null;
   if (!shareRow) return notActive();
@@ -79,6 +84,7 @@ export async function GET(
   ]);
 
   if (itemsResult.error || outfitsResult.error) {
+    console.error("Shared wardrobe load failed:", itemsResult.error ?? outfitsResult.error);
     return Response.json({ error: "Could not load this wardrobe." }, { status: 500 });
   }
 

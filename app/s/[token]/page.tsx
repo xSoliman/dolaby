@@ -11,6 +11,7 @@ import {
   Shirt,
   Star,
   ThermometerSun,
+  Wrench,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -31,7 +32,9 @@ type StatusFilter = "all" | OwnershipStatus;
 export default function SharedWardrobePage() {
   const params = useParams<{ token: string }>();
   const token = params.token;
-  const [status, setStatus] = useState<"loading" | "ready" | "inactive">("loading");
+  const [status, setStatus] = useState<"loading" | "ready" | "inactive" | "unconfigured">(
+    "loading",
+  );
   const [ownerName, setOwnerName] = useState("");
   const [items, setItems] = useState<Item[]>([]);
   const [outfits, setOutfits] = useState<Outfit[]>([]);
@@ -44,6 +47,7 @@ export default function SharedWardrobePage() {
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
+      let serverUnconfigured = false;
       try {
         const response = await fetch(`/api/share/${token}`);
         if (response.ok) {
@@ -56,6 +60,7 @@ export default function SharedWardrobePage() {
           }
           return;
         }
+        serverUnconfigured = response.status === 503;
       } catch {
         // Fall through to the same-device demo preview below.
       }
@@ -75,10 +80,10 @@ export default function SharedWardrobePage() {
               return;
             }
           } catch {
-            // Fall through to inactive.
+            // Fall through below.
           }
         }
-        setStatus("inactive");
+        setStatus(serverUnconfigured ? "unconfigured" : "inactive");
       }
     };
     void load();
@@ -108,6 +113,28 @@ export default function SharedWardrobePage() {
       <div className="app-loading">
         <Logo />
         <span className="loading-dot" />
+      </div>
+    );
+  }
+
+  if (status === "unconfigured") {
+    return (
+      <div className="share-page">
+        <div className="share-shell">
+          <div className="share-topbar">
+            <Logo href="/" />
+          </div>
+          <EmptyState
+            icon={Wrench}
+            title="Sharing isn't set up yet"
+            copy="This wardrobe's server is missing its sharing configuration. If you're the owner, add SUPABASE_SERVICE_ROLE_KEY to the server environment and restart the app."
+            action={
+              <Link className="button button-secondary button-md" href="/">
+                Back to Dolaby
+              </Link>
+            }
+          />
+        </div>
       </div>
     );
   }
